@@ -1,0 +1,99 @@
+Procedure:
+
+1) MariaDB [practice]> select * from employee;
++----+--------+------+--------+
+| id | name   | dept | salary |
++----+--------+------+--------+
+|  1 | rohan  | Python  |  20000 |
+|  2 | suraj | JS   |  32000 |
+|  3 | abhi  | JS   |  25000 |
+|  4 | aish   | JS   |  10000 |
+|  5 | rahul | Python  |  10000 |
++----+--------+------+--------+
+5 rows in set (0.061 sec)
+
+MariaDB [practice]> delimiter $$
+MariaDB [practice]> create procedure GetJsEmployee()
+    -> begin
+    -> select name from employee where dept='JS';
+    -> end$$
+Query OK, 0 rows affected (0.019 sec)
+
+MariaDB [practice]> delimiter ;
+MariaDB [practice]> call GetJsEmployee;
++--------+
+| name   |
++--------+
+| suraj |
+| abhi  |
+| aish   |
++--------+
+3 rows in set (0.002 sec)
+
+Query OK, 0 rows affected (0.008 sec)
+
+2)
+MariaDB [practice]> create  procedure checkSalary(IN empname varchar(20),OUT sal int)
+    -> begin
+    -> select salary into sal from employee where name=empname;
+    -> end$$
+Query OK, 0 rows affected (0.017 sec)
+
+MariaDB [practice]> delimiter ;
+MariaDB [practice]> call checkSalary('abhi',@sal);
+Query OK, 1 row affected (0.002 sec)
+
+MariaDB [practice]> select @sal;
++-------+
+| @sal  |
++-------+
+| 25000 |
++-------+
+1 row in set (0.001 sec)
+
+View:
+MariaDB [practice]> create view StudEmp as select student.id,student.name,student.age,employee.dept,employee.salary from student inner join employee using(id);
+Query OK, 0 rows affected (0.005 sec)
+
+MariaDB [practice]> select * from StudEmp;
++----+-----------+-----+------+--------+
+| id | name      | age | dept | salary |
++----+-----------+-----+------+--------+
+|  1 | pratiksha |  21 | Python  |  20000 |
+|  2 | ganesh    |  18 | JS   |  32000 |
+|  3 | abhi     |  22 | JS   |  25000 |
++----+-----------+-----+------+--------+
+3 rows in set (0.003 sec)
+
+Trigger:
+MariaDB [practice]> CREATE TABLE employeetrig(name varchar(45) NOT NULL,occupation varchar(35) NOT NULL, working_date date,working_hours varchar(10) );
+Query OK, 0 rows affected (0.037 sec)
+
+MariaDB [practice]> INSERT INTO employeetrig VALUES
+    -> ('Robin', 'Scientist', '2020-10-04', 12),
+    -> ('Warner', 'Engineer', '2020-10-04', 10),
+    -> ('Peter', 'Actor', '2020-10-04', 13),
+    -> ('Marco', 'Doctor', '2020-10-04', 14),
+    -> ('Brayden', 'Teacher', '2020-10-04', 12),
+    -> ('Antonio', 'Business', '2020-10-04', 11);
+
+MariaDB [practice]> Create Trigger before_insert_empworkinghours
+    -> BEFORE INSERT ON employeetrig FOR EACH ROW BEGIN
+    -> IF NEW.working_hours < 0 THEN SET NEW.working_hours = 0;
+    -> END IF;
+    -> END //
+Query OK, 0 rows affected (0.011 sec)
+MariaDB [practice]> INSERT INTO employeetrig VALUES ('Alexander', 'Actor', '2020-10-012', -13);
+Query OK, 1 row affected (0.008 sec)
+
+MariaDB [practice]> select * from employeetrig;
++-----------+------------+--------------+---------------+
+| name      | occupation | working_date | working_hours |
++-----------+------------+--------------+---------------+
+| Robin     | Scientist  | 2020-10-04   | 12            |
+| Warner    | Engineer   | 2020-10-04   | 10            |
+| Peter     | Actor      | 2020-10-04   | 13            |
+| Marco     | Doctor     | 2020-10-04   | 14            |
+| Alexander | Actor      | 2020-10-12   | 0             |
++-----------+------------+--------------+---------------+
+5 rows in set (0.003 sec)
